@@ -33,6 +33,7 @@ bool turn;
 
 SoundEffects se;
 
+//doesn't work
 int showmenu(SDL_Surface* screen, TTF_Font* font)
 {
     Uint32 time;
