@@ -1,5 +1,6 @@
 # pong
-Pong made in C++
+Pong made in C++ </br>
+Latest version: 1.1
 
 ## Pre-made files
 If you don't want to build pong by yourself, you can download pre-compiled binaries on the release page:</br>
