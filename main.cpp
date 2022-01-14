@@ -16,7 +16,6 @@ enum MenuOption {
     Quit = 2,
 };
 
-SDL_Rect quitR, startR;
 MenuOption menuOption;
 GameFlags flag = GameFlags::Menu;
 
@@ -80,20 +79,22 @@ void write(std::string text, int x, int y){
     SDL_DestroyTexture(texture);
 }
 
-void writeMenu(std::string text, int x, int y){
-    SDL_Surface *surface;
-    SDL_Texture *texture;
-    const char *t = text.c_str();
-    surface = TTF_RenderText_Solid(font, t, color);
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
+void writeText(const char *text, int x, int y, int w, int h){
+    SDL_Color White = {255, 255, 255};
+    //text
+    SDL_Surface* stringTxt =
+            TTF_RenderText_Solid(font, text, White);
+    SDL_Texture* stringTx = SDL_CreateTextureFromSurface(renderer, stringTxt);
+    SDL_Rect stringRct; //create a rect
+    stringRct.x = x;  //controls the rect's x coordinate
+    stringRct.y = y; // controls the rect's y coordinte
+    stringRct.w = w; // controls the width of the rect
+    stringRct.h = h; // controls the height of the rect
+    SDL_RenderCopy(renderer, stringTx, NULL, &stringRct);
 
-    score_board.w = surface->w;
-    score_board.h = surface->h;
-    score_board.x = x - score_board.w;
-    score_board.y = y - score_board.h;
-    SDL_FreeSurface(surface);
-    SDL_RenderCopy(renderer, texture, NULL, &score_board);
-    SDL_DestroyTexture(texture);
+    //free memory
+    SDL_FreeSurface(stringTxt);
+    SDL_DestroyTexture(stringTx);
 }
 
 void input(){
@@ -201,10 +202,6 @@ void update() {
     if(r_paddle.y+r_paddle.h>HEIGHT) r_paddle.y=HEIGHT - r_paddle.h;
 }
 
-void updateMenu() {
-
-}
-
 void render(){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
@@ -238,48 +235,13 @@ void renderMenu(){
     }
 
     //Title text
-    SDL_Surface* titleTxt =
-            TTF_RenderText_Solid(font, "Pong", White);
-    SDL_Texture* titleTx = SDL_CreateTextureFromSurface(renderer, titleTxt);
-    SDL_Rect titleRct; //create a rect
-    titleRct.x = WIDTH/2 - 100;  //controls the rect's x coordinate
-    titleRct.y = 50; // controls the rect's y coordinte
-    titleRct.w = 200; // controls the width of the rect
-    titleRct.h = FONT_SIZE*3; // controls the height of the rect
-    SDL_RenderCopy(renderer, titleTx, NULL, &titleRct);
-
-    //Start Game text
-    SDL_Surface* startTxt =
-            TTF_RenderText_Solid(font, "Start Game", White);
-    SDL_Texture* startTx = SDL_CreateTextureFromSurface(renderer, startTxt);
-    SDL_Rect startRct; //create a rect
-    startRct.x = WIDTH/2 - 90;  //controls the rect's x coordinate
-    startRct.y = HEIGHT/2 - 50; // controls the rect's y coordinte
-    startRct.w = 170; // controls the width of the rect
-    startRct.h = FONT_SIZE*2; // controls the height of the rect
-    SDL_RenderCopy(renderer, startTx, NULL, &startRct);
-
-    //Quit Game text
-    SDL_Surface* quitTxt =
-            TTF_RenderText_Solid(font, "Quit Game", White);
-    SDL_Texture* quitTx = SDL_CreateTextureFromSurface(renderer, quitTxt);
-    SDL_Rect quitRct; //create a rect
-    quitRct.x = WIDTH/2 - 90;  //controls the rect's x coordinate
-    quitRct.y = HEIGHT/2 + 20;// controls the rect's y coordinte
-    quitRct.w = 170; // controls the width of the rect
-    quitRct.h = FONT_SIZE*2; // controls the height of the rect
-    SDL_RenderCopy(renderer, quitTx, NULL, &quitRct);
-
+    writeText("Pong", WIDTH/2 - 100, 50, 200, FONT_SIZE*3);
+    //Start game option
+    writeText("Start Game", WIDTH/2 - 90, HEIGHT/2 - 50, 170, FONT_SIZE*2);
+    //Quit game option
+    writeText("Quit Game", WIDTH/2 - 90, HEIGHT/2 + 20, 170, FONT_SIZE*2);
     //Credit text
-    SDL_Surface* creditTxt =
-            TTF_RenderText_Solid(font, "By Yot", White);
-    SDL_Texture* creditTx = SDL_CreateTextureFromSurface(renderer, creditTxt);
-    SDL_Rect creditRct; //create a rect
-    creditRct.x = WIDTH/2 - 75;  //controls the rect's x coordinate
-    creditRct.y = HEIGHT/2 + 280;// controls the rect's y coordinte
-    creditRct.w = 120; // controls the width of the rect
-    creditRct.h = FONT_SIZE + 10; // controls the height of the rect
-    SDL_RenderCopy(renderer, creditTx, NULL, &creditRct);
+    writeText("By Yot", WIDTH/2 - 75, HEIGHT/2 + 280, 120, FONT_SIZE + 10);
 
     int x,y;
 
@@ -306,18 +268,6 @@ void renderMenu(){
 
     SDL_DestroyTexture(image_surface);
     SDL_RenderPresent(renderer);
-
-    SDL_FreeSurface(quitTxt);
-    SDL_DestroyTexture(quitTx);
-
-    SDL_FreeSurface(startTxt);
-    SDL_DestroyTexture(startTx);
-
-    SDL_FreeSurface(titleTxt);
-    SDL_DestroyTexture(titleTx);
-
-    SDL_FreeSurface(creditTxt);
-    SDL_DestroyTexture(creditTx);
 }
 
 int main(int, char **) {
@@ -356,6 +306,7 @@ int main(int, char **) {
     r_paddle.x = WIDTH - r_paddle.w - 32;
     ball.w = ball.h = SIZE;
 
+    //start main menu
     if (flag & GameFlags::Menu){
         std::cout << "Menu" << std::endl;
         mRunning = true;
@@ -366,12 +317,13 @@ int main(int, char **) {
                 FPS = frameCount;
                 frameCount = 0;
             }
-            updateMenu();
             inputMenu();
             renderMenu();
         }
 
     }
+
+    //start game
     if (flag & GameFlags::Gameplay){
         std::cout << "Game" << std::endl;
         serve();
