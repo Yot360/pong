@@ -2,6 +2,11 @@
 Pong made in C++ </br>
 Latest version: 1.1
 
+## Features
+- An infinite pong game
+- A pause menu while in game
+- A main menu
+
 ## Pre-made files
 If you don't want to build pong by yourself, you can download pre-compiled binaries on the release page:</br>
 https://github.com/Yot360/pong/releases/latest
