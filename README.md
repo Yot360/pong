@@ -7,6 +7,11 @@ Latest version: 1.1
 - A pause menu while in game
 - A main menu
 
+## Images
+![Main menu](images/main.png)
+![Game](images/game.png)
+![Pause Menu](images/pause.png)
+
 ## Pre-made files
 If you don't want to build pong by yourself, you can download pre-compiled binaries on the release page:</br>
 https://github.com/Yot360/pong/releases/latest
