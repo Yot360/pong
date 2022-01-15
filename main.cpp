@@ -11,12 +11,18 @@ enum GameFlags {
     Gameplay = 2,
 };
 
+enum PauseOption {
+    Continue = 1,
+    Exit = 2,
+};
+
 enum MenuOption {
     Start = 1,
     Quit = 2,
 };
 
 MenuOption menuOption;
+PauseOption pauseOption;
 GameFlags flag = GameFlags::Menu;
 
 int HEIGHT = 720;
@@ -36,9 +42,11 @@ TTF_Font *font = TTF_OpenFont("assets/Peepo.ttf", FONT_SIZE/2);
 SDL_Color color;
 
 bool running;
+bool allRunning;
 bool mRunning;
 int frameCount, timerFPS, lastFrame, FPS;
 int selR;
+bool isPaused = false;
 
 SDL_Rect l_paddle, r_paddle, ball, score_board;
 float velX, velY;
@@ -108,15 +116,40 @@ void input(){
         if (e.type == SDL_KEYDOWN){
             switch (e.key.keysym.sym) {
                 case SDLK_UP:
-                    key_down = true;
-                    key_up = false;
+                    if (!isPaused){
+                        key_down = true;
+                        key_up = false;
+                    }else{
+                        selR = 1;
+                        if (pauseOption != PauseOption::Continue) se.playSoundEffect(0);
+                        pauseOption = PauseOption::Continue;
+                    }
                     break;
                 case SDLK_DOWN:
-                    key_up = true;
-                    key_down = false;
+                    if (!isPaused){
+                        key_up = true;
+                        key_down = false;
+                    }else{
+                        selR = 2;
+                        if (pauseOption != PauseOption::Exit) se.playSoundEffect(0);
+                        pauseOption = PauseOption::Exit;
+                    }
                     break;
                 case SDLK_ESCAPE:
-                    running = false;
+                    //running = false;
+                    isPaused = !isPaused;
+                    break;
+                case SDLK_RETURN:
+                    if (pauseOption == PauseOption::Exit){
+                        flag = GameFlags::Menu;
+                        mRunning = true;
+                        running = false;
+                        isPaused = false;
+                        selR = 1;
+                    }
+                    else if (pauseOption == PauseOption::Continue) {
+                        isPaused = false;
+                    }
                     break;
             }
         }
@@ -151,7 +184,10 @@ void inputMenu(){
                     menuOption = MenuOption::Quit;
                     break;
                 case SDLK_RETURN:
-                    if (menuOption == MenuOption::Quit) mRunning = false;
+                    if (menuOption == MenuOption::Quit){
+                        mRunning = false;
+                        allRunning = false;
+                    }
                     else if (menuOption == MenuOption::Start) {
                         flag = GameFlags::Gameplay;
                         running = true;
@@ -217,6 +253,34 @@ void render(){
     SDL_RenderFillRect(renderer, &r_paddle);
     SDL_RenderFillRect(renderer, &ball);
     write(score, WIDTH/2 + FONT_SIZE, FONT_SIZE * 2);
+
+    if (isPaused){
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+        int x,y;
+
+        //Start game option
+        writeText("Continue", WIDTH/2 - 90, HEIGHT/2 - 50, 170, FONT_SIZE*2);
+        //Quit game option
+        writeText("Main Menu", WIDTH/2 - 90, HEIGHT/2 + 20, 170, FONT_SIZE*2);
+
+        //load triangle to texture
+        SDL_Surface *triangle = STBIMG_Load("assets/triangle.png");
+        SDL_Texture* image_surface = SDL_CreateTextureFromSurface(renderer, triangle);
+
+        // start rect
+        if (selR == 1){
+            x = WIDTH/2 - 140;
+            y = HEIGHT/2 - 30;
+            SDL_Rect image_rect = {x, y, 32, 32};
+            SDL_RenderCopy(renderer, image_surface, nullptr, &image_rect);
+        } else if (selR == 2){
+            x = WIDTH/2 - 140;
+            y = HEIGHT/2 + 40;
+            SDL_Rect image_rect = {x, y, 32, 32};
+            SDL_RenderCopy(renderer, image_surface, nullptr, &image_rect);
+        }
+    }
 
     SDL_RenderPresent(renderer);
 
@@ -306,47 +370,48 @@ int main(int, char **) {
     r_paddle.x = WIDTH - r_paddle.w - 32;
     ball.w = ball.h = SIZE;
 
-    //start main menu
-    if (flag & GameFlags::Menu){
-        std::cout << "Menu" << std::endl;
-        mRunning = true;
-        while (mRunning){
-            lastFrame = SDL_GetTicks();
-            if (lastFrame>=(lastTime + 1000)){
-                lastTime = lastFrame;
-                FPS = frameCount;
-                frameCount = 0;
+    allRunning = true;
+    while (allRunning){
+        //start main menu
+        if (flag & GameFlags::Menu){
+            std::cout << "Menu" << std::endl;
+            mRunning = true;
+            while (mRunning){
+                lastFrame = SDL_GetTicks();
+                if (lastFrame>=(lastTime + 1000)){
+                    lastTime = lastFrame;
+                    FPS = frameCount;
+                    frameCount = 0;
+                }
+                inputMenu();
+                renderMenu();
             }
-            inputMenu();
-            renderMenu();
+
         }
 
-    }
+        //start game
+        if (flag & GameFlags::Gameplay){
+            std::cout << "Game" << std::endl;
+            serve();
 
-    //start game
-    if (flag & GameFlags::Gameplay){
-        std::cout << "Game" << std::endl;
-        serve();
-
-        running = true;
-        while (running){
-            lastFrame = SDL_GetTicks();
-            if (lastFrame>=(lastTime + 1000)){
-                lastTime = lastFrame;
-                FPS = frameCount;
-                frameCount = 0;
+            running = true;
+            while (running){
+                lastFrame = SDL_GetTicks();
+                if (lastFrame>=(lastTime + 1000)){
+                    lastTime = lastFrame;
+                    FPS = frameCount;
+                    frameCount = 0;
+                }
+                if (key_up)
+                    l_paddle.y += SPEED;
+                else if (key_down)
+                    l_paddle.y -= SPEED;
+                if (!isPaused)   update();
+                input();
+                render();
             }
-            if (key_up)
-                l_paddle.y += SPEED;
-            else if (key_down)
-                l_paddle.y -= SPEED;
-            update();
-            input();
-            render();
         }
     }
-
-
 
     TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
