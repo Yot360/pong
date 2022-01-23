@@ -18,7 +18,6 @@ If you don't want to build pong by yourself, you can download pre-compiled binar
 https://github.com/Yot360/pong/releases/latest
 
 #### Windows:
-Download Microsoft Visual C++ Redistributable x86 here: https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170</br>
 Extract the .zip and run pong.exe
 
 #### macOS
