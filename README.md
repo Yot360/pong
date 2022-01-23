@@ -1,11 +1,12 @@
 # pong
 Pong made in C++ </br>
-Latest version: 1.1
+Latest version: 1.3
 
 ## Features
 - An infinite pong game
 - A pause menu while in game
 - A main menu
+- Bonus
 
 ## Images
 ![Main menu](images/main.png)
