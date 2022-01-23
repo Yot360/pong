@@ -1,6 +1,6 @@
 # Maintainer: Yot
 pkgname=pong
-pkgver=1.1
+pkgver=1.3
 pkgrel=1
 epoch=
 pkgdesc="Arcade _pong made in C++"
