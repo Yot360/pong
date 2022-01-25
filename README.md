@@ -23,6 +23,9 @@ Extract the .zip and run pong.exe
 #### macOS
 Run the run_once_before.command file with right click->Open, and then run the pong app
 
+#### Nintendo Switch Homebrew App
+Get the .nro file from the release
+
 ## Building
 ### ArchLinux
 To build on arch: </br>
